@@ -1,0 +1,36 @@
+{
+    "name": "rengandb",
+    "version": "1.0.5",
+    "description": "RenganDB Database Module",
+    "license": "MIT",
+    "author": {
+        "name": "RengaN"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/RengaN02/rengandb.git"
+    },
+    "type": "module",
+    "main": "build/main.js",
+    "types": "build/main.d.ts",
+    "files": [
+        "build/",
+        "README.md",
+        "LICENSE"
+    ],
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "chokidar": "^4.0.3",
+        "lodash": "^4.18.1",
+        "proper-lockfile": "^4.1.2",
+        "yaml": "^2.9.0"
+    },
+    "devDependencies": {
+        "@types/lodash": "^4.17.24",
+        "@types/node": "^20.0.0",
+        "@types/proper-lockfile": "^4.1.4",
+        "typescript": "^5.0.0"
+    }
+}
