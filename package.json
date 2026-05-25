@@ -1,6 +1,6 @@
 {
     "name": "rengandb",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "RenganDB Database Module",
     "license": "MIT",
     "author": {
@@ -10,7 +10,6 @@
         "type": "git",
         "url": "git+https://github.com/RengaN02/rengandb.git"
     },
-    "type": "module",
     "main": "build/main.js",
     "types": "build/main.d.ts",
     "files": [
