@@ -27,7 +27,7 @@ interface IFileSys {
     writeFile(path: string, data: any): void;
     readFile(path: string): Promise<string>;
     watch(path: string): any;
-    stopWatcher(): Promise<void>;
+    stopWatcher(watcher?: any): Promise<void>;
 }
 
 type KeyType<KT extends boolean> = KT extends true ? string | Array<string | number | symbol> : string;
@@ -155,7 +155,7 @@ class Database<KT extends boolean> {
                 })
                 return watcher
             },
-            stopWatcher: async() => {if(this.watcher) {await this.watcher.close()}}
+            stopWatcher: async(watcher?: any) => {if(watcher) {await watcher.close()}}
         }
     }
 
@@ -196,7 +196,7 @@ class Database<KT extends boolean> {
 
     async startWatcher() {
         if (this.watcher) {
-            await this.filesystem.stopWatcher();
+            await this.filesystem.stopWatcher(this.watcher);
         }
         
         this.watcher = await this.filesystem.watch(this.file)
