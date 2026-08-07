@@ -220,31 +220,38 @@ class Database<KT extends boolean> {
 
         const thetask = this.writeQueue.then(async () => {
             this.isWriting = true;
-            let releaseLock: (() => Promise<void>) | undefined;
-
+            let releaseLock;
             try {
                 releaseLock = await lockfile.lock(this.file, {
-                    retries: { retries: 10, minTimeout: 50 },
-                    stale: 5000, 
+                    retries: { retries: 5, minTimeout: 10 }, 
+                    stale: 5000,
                 });
+
                 const content = this.provider.stringify(this.data);
                 await this.filesystem.writeFile(this.file, content);
-                await new Promise(resolve => setTimeout(resolve, 150));
-                
-            } catch (err: any) {
-                throw err
-            } finally {
+
+            }
+            catch (err) {
+                throw err;
+            }
+            finally {
                 this.isWriting = false;
                 if (typeof releaseLock === 'function') {
-                    await releaseLock();
+                    try {
+                        await releaseLock();
+                    } catch (e: any) {
+                        if (e.code !== 'EBUSY' && e.code !== 'EPERM' && e.code !== 'ENOENT') {
+                            console.warn(`[Saver.db] Lock temizlenirken önemsiz uyarı: ${e.message}`);
+                        }
+                    }
                 }
             }
-        })
+        });
 
-        this.writeQueue = thetask.catch(() => {});
+        this.writeQueue = thetask.catch(() => { });
 
         try {
-            await thetask; 
+            await thetask;
         } catch (err: any) {
             throw this.error(`Writing Error: ${err.message}`);
         }
