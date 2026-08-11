@@ -15,8 +15,6 @@ Thumbs.db
 .vscode/
 .idea/
 
-test/
-
 database.json
 database.yml
 database.yaml

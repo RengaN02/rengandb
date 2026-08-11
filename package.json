@@ -1,6 +1,6 @@
 {
     "name": "rengandb",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "description": "RenganDB Database Module",
     "license": "MIT",
     "author": {
@@ -18,7 +18,8 @@
         "LICENSE"
     ],
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "test": "vitest run"
     },
     "dependencies": {
         "chokidar": "^4.0.3",
@@ -28,8 +29,9 @@
     },
     "devDependencies": {
         "@types/lodash": "^4.17.24",
-        "@types/node": "^20.0.0",
+        "@types/node": "^20.19.43",
         "@types/proper-lockfile": "^4.1.4",
-        "typescript": "^5.0.0"
+        "typescript": "^5.9.3",
+        "vitest": "^4.1.10"
     }
 }
