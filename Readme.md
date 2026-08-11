@@ -134,6 +134,27 @@ Once initialized via `await Database.init(file, settings)`, you can use the foll
 
 ---
 
+## Building
+
+Prerequisites:
+
+- Node.js >= 16
+- npm (or yarn)
+
+Install dependencies:
+
+```bash
+npm install
+# or: yarn install
+```
+
+Build the project:
+
+```bash
+npm run build
+# or: yarn build
+```
+
 ## License
 
 This project is licensed under the MIT License. 

@@ -82,9 +82,8 @@ class Database<KT extends boolean> {
         await instance.startWatcher();
         return instance;
 
-    }   
-    
-    
+    }
+
     // Engines (is it lodash or not)
 
     _lodash(): IEngine<KT> {
@@ -198,7 +197,7 @@ class Database<KT extends boolean> {
         if (this.watcher) {
             await this.filesystem.stopWatcher(this.watcher);
         }
-        
+
         this.watcher = await this.filesystem.watch(this.file)
     }
 
@@ -229,7 +228,6 @@ class Database<KT extends boolean> {
 
                 const content = this.provider.stringify(this.data);
                 await this.filesystem.writeFile(this.file, content);
-
             }
             catch (err) {
                 throw err;
@@ -255,7 +253,6 @@ class Database<KT extends boolean> {
         } catch (err: any) {
             throw this.error(`Writing Error: ${err.message}`);
         }
-
     }
 
     error(message: string) {
@@ -265,16 +262,15 @@ class Database<KT extends boolean> {
     async set(key: KeyType<KT>, value: any): Promise<void> {
         if(!key) throw this.error(`Undefined key! - ${key}`);
         if(value === undefined) throw this.error(`Undefined value! - ${value}`);
-        
+
         this.engine.set(key, value)
         await this.write();
-
     }
 
     async delete(key: KeyType<KT>): Promise<void> {
         if(!key) throw this.error(`Undefined key! - ${key}`);
         if(!this.engine.has(key)) throw this.error(`${key} not found in database.`);
-        
+
         this.engine.delete(key)
         await this.write();
     }
@@ -283,13 +279,13 @@ class Database<KT extends boolean> {
         if(!key) throw this.error(`Undefined key! - ${key}`);
         if(value === undefined) throw this.error(`Undefined value! - ${value}`);
         if(!func) throw this.error(`Undefined func!`);  
-        
+
         if(!this.engine.has(key)) throw this.error(`${key} not found in database.`);
         const found: any = this.engine.get(key);
         const numValue = Number(value);
         if(Number.isNaN(numValue)) throw this.error('Value is not number!');
         if(isNaN(found)) throw this.error('Found data is not number!');
-        
+
         this.engine.set(key, func(found, numValue))
         await this.write();
     }
@@ -297,15 +293,15 @@ class Database<KT extends boolean> {
     async push(key: KeyType<KT>, value: any): Promise<void> {
         if(!key) throw this.error(`Undefined key! - ${key}`);
         if(value === undefined) throw this.error(`Undefined value! - ${value}`);
-        
+
         let found: any[] | undefined = this.engine.get(key);
-    
+
         if(found === undefined) {
             found = [];
         } else if(!Array.isArray(found)) {
             throw this.error(`Thats not an array! - ${key}`);
         }
-    
+
         found.push(value);
         this.engine.set(key, found)
         await this.write();
@@ -338,19 +334,20 @@ class Database<KT extends boolean> {
         return this.engine.get(key) ?? null;
     }
 
-    get = this.fetch;
+    get(key: KeyType<KT>): any {
+        return this.fetch(key)
+    }
 
     find(key: KeyType<KT>, condition: any): any {
         if(!key) throw this.error(`Undefined key! - ${key}`);
         let foundArray: any[] | undefined = this.engine.get(key);
-    
+
         if(!Array.isArray(foundArray)) {
             throw this.error(`Thats not an array! - ${key}`);
         }
 
         let found: any = foundArray.find(condition)
         return found;
-
     }
 
     findIndex(key: KeyType<KT>, condition: any): number {
