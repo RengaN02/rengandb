@@ -51,6 +51,8 @@ class Database<KT extends boolean> {
     private isWriting: boolean;
     private lodash: any;
 
+    destroyed: boolean;
+
     constructor(file: string, settings: IDatabaseSettings<KT> = {}) {
         this.initialized = false;
         this.file = file;
@@ -72,6 +74,7 @@ class Database<KT extends boolean> {
         this.watcher = null
         this.writeQueue = Promise.resolve(); 
         this.isWriting = false;
+        this.destroyed = false;
     }
 
     static async init(...parameters: ConstructorParameters<typeof Database>) {
@@ -81,12 +84,16 @@ class Database<KT extends boolean> {
         instance.data = await instance.loadData()
         await instance.startWatcher();
         return instance;
+    }
 
+    async destroy() {
+        this.destroyed = true;
+        await this.filesystem.stopWatcher(this.watcher)
     }
 
     // Engines (is it lodash or not)
 
-    _lodash(): IEngine<KT> {
+    private _lodash(): IEngine<KT> {
         return {
             get: (key: KeyType<KT>) => this.lodash.get(this.data, key),
             set: (key: KeyType<KT>, value: any) => this.lodash.set(this.data, key, value),
@@ -95,7 +102,7 @@ class Database<KT extends boolean> {
         };
     }
 
-    _native(): IEngine<KT> {
+    private _native(): IEngine<KT> {
         const normalizeKey = (k: KeyType<KT>): string => {
             return Array.isArray(k) ? k.join(".") : String(k);
         };
@@ -111,14 +118,14 @@ class Database<KT extends boolean> {
 
     // File Types
 
-    _json(): IProvider {
+    private _json(): IProvider {
         return {
             stringify: (data: any) => JSON.stringify(data, null, 4),
             parse: (data: any) => JSON.parse(data)
         };
     }
 
-    _yaml(): IProvider {
+    private _yaml(): IProvider {
         return {
             stringify: (data: any) => YAML.stringify(data, null, { indent: 4 }),
             parse: (data: any) => YAML.parse(data)
@@ -127,7 +134,7 @@ class Database<KT extends boolean> {
 
     // File Systems
 
-    _fs(): IFileSys {
+    private _fs(): IFileSys {
         return {
             isExists: async (path: string) => {
                 try { await fsPromises.access(path); return true; } 
@@ -202,7 +209,7 @@ class Database<KT extends boolean> {
     }
 
     async loadData() {
-        if(!this.initialized) throw this.error("Not initialized");
+        if(!this.isValidDatabase()) {return;}
         try {
             if(!await this.filesystem.isExists(this.file)) {
                 await this.filesystem.writeFile(this.file, this.provider.stringify({}))
@@ -215,7 +222,7 @@ class Database<KT extends boolean> {
     }
 
     async write() {
-        if(!this.initialized) throw this.error("Not initialized");
+        if(!this.isValidDatabase()) {return;}
 
         const thetask = this.writeQueue.then(async () => {
             this.isWriting = true;
@@ -260,6 +267,7 @@ class Database<KT extends boolean> {
     }
 
     async set(key: KeyType<KT>, value: any): Promise<void> {
+        if(!this.isValidDatabase()) {return;}
         if(!key) throw this.error(`Undefined key! - ${key}`);
         if(value === undefined) throw this.error(`Undefined value! - ${value}`);
 
@@ -268,6 +276,7 @@ class Database<KT extends boolean> {
     }
 
     async delete(key: KeyType<KT>): Promise<void> {
+        if(!this.isValidDatabase()) {return;}
         if(!key) throw this.error(`Undefined key! - ${key}`);
         if(!this.engine.has(key)) throw this.error(`${key} not found in database.`);
 
@@ -276,6 +285,7 @@ class Database<KT extends boolean> {
     }
 
     async math(key: KeyType<KT>, value: any, func: (found: number, value: number) => number): Promise<void> {
+        if(!this.isValidDatabase()) {return;}
         if(!key) throw this.error(`Undefined key! - ${key}`);
         if(value === undefined) throw this.error(`Undefined value! - ${value}`);
         if(!func) throw this.error(`Undefined func!`);  
@@ -291,6 +301,7 @@ class Database<KT extends boolean> {
     }
 
     async push(key: KeyType<KT>, value: any): Promise<void> {
+        if(!this.isValidDatabase()) {return;}
         if(!key) throw this.error(`Undefined key! - ${key}`);
         if(value === undefined) throw this.error(`Undefined value! - ${value}`);
 
@@ -308,6 +319,7 @@ class Database<KT extends boolean> {
     }
 
     async clear(really: boolean): Promise<void> {
+        if(!this.isValidDatabase()) {return;}
         if(really) {
             this.data = {};
             await this.write();
@@ -315,6 +327,7 @@ class Database<KT extends boolean> {
     }
 
     length(key: KeyType<KT>): number | undefined {
+        if(!this.isValidDatabase()) {return;}
         const found = this.engine.get(key);
         if(found === undefined) {
             return undefined;
@@ -325,11 +338,13 @@ class Database<KT extends boolean> {
     }
 
     has(key: KeyType<KT>): boolean {
+        if(!this.isValidDatabase()) {return false;}
         if(!key) throw this.error(`Undefined key! - ${key}`);
         return this.engine.has(key);
     }
 
     fetch(key: KeyType<KT>): any {
+        if(!this.isValidDatabase()) {return;}
         if(!key) throw this.error(`Undefined key! - ${key}`);
         return this.engine.get(key) ?? null;
     }
@@ -339,6 +354,7 @@ class Database<KT extends boolean> {
     }
 
     find(key: KeyType<KT>, condition: any): any {
+        if(!this.isValidDatabase()) {return;}
         if(!key) throw this.error(`Undefined key! - ${key}`);
         let foundArray: any[] | undefined = this.engine.get(key);
 
@@ -351,6 +367,7 @@ class Database<KT extends boolean> {
     }
 
     findIndex(key: KeyType<KT>, condition: any): number {
+        if(!this.isValidDatabase()) {return -1;}
         if(!key) throw this.error(`Undefined key! - ${key}`);
         let foundArray: any[] | undefined = this.engine.get(key);
     
@@ -363,7 +380,20 @@ class Database<KT extends boolean> {
     }
 
     fetchAll(): any {
+        if(!this.isValidDatabase()) {return null;}
         return this.data;
+    }
+
+    isValidDatabase() {
+        if(!this.initialized) {
+            console.error(this.error("Database is not initialized"))
+            return false
+        }
+        if(this.destroyed) {
+            console.error(this.error("Database is destroyed"))
+            return false
+        }
+        return true;
     }
 
 }
