@@ -15,7 +15,7 @@ async function closeDbWatcher(db: Database<any>) {
     }
 }
 
-describe('Saver.db (Database Class)', () => {
+describe('Rengandb (Database Class)', () => {
     
     // Create a temporary directory before tests start
     beforeEach(async () => {

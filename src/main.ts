@@ -239,7 +239,7 @@ class Database<KT extends boolean> {
                         await releaseLock();
                     } catch (e: any) {
                         if (e.code !== 'EBUSY' && e.code !== 'EPERM' && e.code !== 'ENOENT') {
-                            console.warn(`[Saver.db] Lock temizlenirken önemsiz uyarı: ${e.message}`);
+                            console.warn(`[Rengandb] Lock temizlenirken önemsiz uyarı: ${e.message}`);
                         }
                     }
                 }
@@ -256,7 +256,7 @@ class Database<KT extends boolean> {
     }
 
     error(message: string) {
-        return new Error(`Saver.db error: ${message}`);
+        return new Error(`Rengandb error: ${message}`);
     }
 
     async set(key: KeyType<KT>, value: any): Promise<void> {
