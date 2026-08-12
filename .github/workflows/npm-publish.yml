@@ -21,7 +21,7 @@ jobs:
           node-version: '24'
           package-manager-cache: false
 
-      - name: Install lastest NPM version
+      - name: Install latest NPM version
         run: npm install -g npm@latest
 
       - run: npm ci
@@ -40,7 +40,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
           package-manager-cache: false
 
-      - name: Install lastest NPM version
+      - name: Install latest NPM version
         run: npm install -g npm@latest
 
       - name: Install Dependencies
