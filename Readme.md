@@ -8,7 +8,6 @@ Designed to be simple yet robust, `rengandb` prevents data corruption (i think..
 ## Features
 
 * 🔒 **Concurrency Safe:** Uses `proper-lockfile` to queue write operations, preventing data corruption when multiple processes try to write simultaneously.
-* 👀 **Live Watcher:** Integrates `chokidar` to monitor your database file. If you edit the JSON/YAML file manually, the RAM is automatically updated.
 * 🪶 **Flexible Engine:** Choose between lightweight native object assignment or powerful deep-object manipulation using `lodash`.
 * 📁 **Multi-Format:** Supports `.json`, `.yaml`, and `.yml` files out of the box.
 
