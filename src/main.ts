@@ -146,13 +146,11 @@ class Database<KT extends boolean> {
             watch: async (filepath: string) => { 
                 const targetPath = path.resolve(filepath);
                 const dirPath = path.dirname(targetPath);
-
                 const subscription = await parcelWatcher.subscribe(dirPath, (err, events) => {
                     if (err) {
                         console.error(this.error(`Watcher error: ${err.message}`));
                         return;
                     }
-
                     for (const event of events) {
                         if (event.path === targetPath) {
                             if((event.type === 'update' && !this.isWriting) || event.type === 'delete') {
@@ -161,7 +159,6 @@ class Database<KT extends boolean> {
                         }
                     }
                 });
-
                 return subscription;
             },
             stopWatcher: async(watcher?: any) => {if(watcher) {await watcher.unsubscribe()}}
