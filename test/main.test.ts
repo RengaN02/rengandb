@@ -52,10 +52,10 @@ describe('Rengandb (Database Class)', () => {
     });
 
     describe('Native Engine Basic CRUD Operations', () => {
-        let db: Database<false>;
+        let db: Database<boolean>;
 
         beforeEach(async () => {
-            db = await Database.init(JSON_FILE) as Database<false>;
+            db = await Database.init(JSON_FILE);
         });
 
         afterEach(async () => {
@@ -97,11 +97,32 @@ describe('Rengandb (Database Class)', () => {
         });
     });
 
-    describe('Mathematical Operations (math)', () => {
-        let db: Database<false>;
+    describe('File Watcher Synchronization', () => {
+        let db1: Database<boolean>;
+        let db2: Database<boolean>;
 
         beforeEach(async () => {
-            db = await Database.init(JSON_FILE) as Database<false>;
+            db1 = await Database.init(JSON_FILE);
+            db2 = await Database.init(JSON_FILE);
+        });
+
+        afterEach(async () => {
+            await closeDbWatcher(db1);
+            await closeDbWatcher(db2);
+        });
+
+        it('Should synchronize data changes across multiple database instances', async () => {
+            await db1.set("score", 100)
+            await expect.poll(() => db2.get('score')).toBe(100);
+        });
+
+    });
+
+    describe('Mathematical Operations (math)', () => {
+        let db: Database<boolean>;
+
+        beforeEach(async () => {
+            db = await Database.init(JSON_FILE);
             await db.set('score', 100);
         });
 
@@ -133,10 +154,10 @@ describe('Rengandb (Database Class)', () => {
     });
 
     describe('Array Operations', () => {
-        let db: Database<false>;
+        let db: Database<boolean>;
 
         beforeEach(async () => {
-            db = await Database.init(JSON_FILE) as Database<false>;
+            db = await Database.init(JSON_FILE);
         });
 
         afterEach(async () => {
@@ -173,10 +194,10 @@ describe('Rengandb (Database Class)', () => {
     });
 
     describe('Lodash Engine Support (useLodash: true)', () => {
-        let db: Database<true>;
+        let db: Database<boolean>;
 
         beforeEach(async () => {
-            db = await Database.init(JSON_FILE, { useLodash: true }) as Database<true>;
+            db = await Database.init(JSON_FILE, { useLodash: true });
         });
 
         afterEach(async () => {
@@ -199,10 +220,10 @@ describe('Rengandb (Database Class)', () => {
     });
 
     describe('Clearing Operations', () => {
-        let db: Database<false>;
+        let db: Database<boolean>;
 
         beforeEach(async () => {
-            db = await Database.init(JSON_FILE) as Database<false>;
+            db = await Database.init(JSON_FILE);
             await db.set('key1', 'val1');
         });
 

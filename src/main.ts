@@ -1,7 +1,7 @@
 import fsPromises from 'fs/promises'
 import path from 'path';
 import YAML from 'yaml';
-import chokidar from 'chokidar'
+import parcelWatcher from '@parcel/watcher';
 import lockfile from 'proper-lockfile';
 
 const supportedFileTypes = [
@@ -136,32 +136,35 @@ class Database<KT extends boolean> {
 
     private _fs(): IFileSys {
         return {
-            isExists: async (path: string) => {
-                try { await fsPromises.access(path); return true; } 
+            isExists: async (filepath: string) => {
+                try { await fsPromises.access(filepath); return true; } 
                 catch { return false; }
             },
-            writeFile: (path: string, data: any) => fsPromises.writeFile(path, data),
-            readFile: (path: string) => fsPromises.readFile(path, 'utf8'),
-            watch: (path: string) => { 
-                const watcher = chokidar.watch(path, {
-                    ignoreInitial: true,
-                    awaitWriteFinish: {
-                        stabilityThreshold: 100,
-                        pollInterval: 50
-                    },
-                })
-                watcher
-                .on('change', (path) => {
-                    if(!this.isWriting) {
-                        this.loadData().then(data => { this.data = data; }).catch(err => { console.error(this.error("Watcher cannot read file")) });
+            writeFile: (filepath: string, data: any) => fsPromises.writeFile(filepath, data),
+            readFile: (filepath: string) => fsPromises.readFile(filepath, 'utf8'),
+
+            watch: async (filepath: string) => { 
+                const targetPath = path.resolve(filepath);
+                const dirPath = path.dirname(targetPath);
+
+                const subscription = await parcelWatcher.subscribe(dirPath, (err, events) => {
+                    if (err) {
+                        console.error(this.error(`Watcher error: ${err.message}`));
+                        return;
                     }
-                })
-                .on('unlink', (path) => {
-                    this.loadData().then(data => { this.data = data; }).catch(err => { console.error(this.error("Watcher cannot read file")) });
-                })
-                return watcher
+
+                    for (const event of events) {
+                        if (event.path === targetPath) {
+                            if((event.type === 'update' && !this.isWriting) || event.type === 'delete') {
+                                this.loadData().then(data => { this.data = data; }).catch(err => { console.error(this.error("Watcher cannot read file")) });
+                            }
+                        }
+                    }
+                });
+
+                return subscription;
             },
-            stopWatcher: async(watcher?: any) => {if(watcher) {await watcher.close()}}
+            stopWatcher: async(watcher?: any) => {if(watcher) {await watcher.unsubscribe()}}
         }
     }
 
