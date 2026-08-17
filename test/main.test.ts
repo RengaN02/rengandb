@@ -8,7 +8,6 @@ const JSON_FILE = path.join(TEMP_DIR, 'test_db.json');
 const YAML_FILE = path.join(TEMP_DIR, 'test_db.yaml');
 const INVALID_FILE = path.join(TEMP_DIR, 'test_db.txt');
 
-// Helper function to close watchers left open during the test process
 async function closeDbWatcher(db: Database<any>) {
     if (db && db.watcher) {
         await db.filesystem.stopWatcher(db.watcher);
@@ -16,15 +15,12 @@ async function closeDbWatcher(db: Database<any>) {
 }
 
 describe('Rengandb (Database Class)', () => {
-    
-    // Create a temporary directory before tests start
     beforeEach(async () => {
         try {
             await fs.mkdir(TEMP_DIR, { recursive: true });
         } catch {}
     });
 
-    // Clean up temporary test files after each test
     afterEach(async () => {
         try {
             await fs.rm(TEMP_DIR, { recursive: true, force: true });

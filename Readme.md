@@ -1,5 +1,8 @@
 # rengandb
-<img alt="60-percent-of-the-time-works-every-time" src="https://forthebadge.com/badges/60-percent-of-the-time-works-every-time.svg">
+[![NPM](https://nodei.co/npm/rengandb.svg?style=compact)](https://nodei.co/npm/rengandb/)
+![60-percent-of-the-time-works-every-time](https://forthebadge.com/badges/60-percent-of-the-time-works-every-time.svg)
+
+
 
 A **safe**, **performant**, and **file-locking protected** JSON/YAML database module for Node.js. 
 
